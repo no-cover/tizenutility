@@ -1,0 +1,141 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0;
+    color: #ffffff;
+}
+#container {
+    width: 100%;
+    height: 100%;
+    background: url('bg.png') repeat-x black;
+    /* background: linear-gradient(0deg, rgba(8,22,38,1) 0%, rgba(16,46,70,1) 50%, rgba(0,61,79,1) 100%); */
+    overflow-y: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+#header {
+    width: 100%;
+    height: 15%;
+    display: table;
+    text-align: center;
+}
+
+#header p {
+	width: 100%;
+    display: table-cell;
+    text-align: center;
+    vertical-align: bottom;
+    font-size: 4em;
+    font-weight: bold;
+}
+
+#contents {
+    width: 100%;
+    height: 70%;
+    display: table;
+    text-align: center;
+}
+
+#main {
+    width: 100%;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#main > p {
+	padding: 10px 0;
+    font-size: 2.5em;
+    font-weight: normal;
+}
+
+#main p.small {
+	padding: 6px 0;
+    font-size: 2em;
+    font-weight: normal;
+}
+
+#footer {
+    width: 100%;
+    height: 15%;
+    display: table;
+    text-align: center;
+}
+
+#footer p {
+    width: 100%;
+    display: table-cell;
+    text-align: center;
+    vertical-align: top;
+}
+
+#footer button {
+    margin: 5px 20px;
+    padding: 15px 85px;
+    border: 0px;
+    border-radius: 20px;
+    /* background: #0c2747; */
+    background: rgba(0,0,0,0.4);
+    color: white;
+    box-shadow: none;
+    font-size: 2em;
+    font-weight: bold;
+    transition: padding box-shadow;
+    transition-duration: 0.1s;
+    opacity: 0.7;
+}
+
+#footer button:focus {
+    margin: 0 5px;
+    padding: 20px 100px;
+    border: 0px;
+    border-radius: 20px;
+    background: white;
+    color: #0c2747;
+    box-shadow: 10px 10px 0 1px rgba(0,0,0,0.5);
+    outline: none;
+    opacity: 1;
+}
+
+#buttons p {
+    width: 100%;
+    display: table-cell;
+    text-align: center;
+    vertical-align: top;
+}
+
+#buttons {
+    width: 100%;
+    height: 15%;
+    display: table;
+    text-align: center;
+}
+
+#buttons button {
+    margin: 5px 20px;
+    padding: 15px 85px;
+    border: 0px;
+    border-radius: 20px;
+    /* background: #0c2747; */
+    background: rgba(0,0,0,0.4);
+    color: white;
+    box-shadow: none;
+    font-size: 2em;
+    font-weight: bold;
+    transition: padding box-shadow;
+    transition-duration: 0.1s;
+    opacity: 0.7;
+}
+
+#buttons button:focus {
+    margin: 0 5px;
+    padding: 20px 100px;
+    border: 0px;
+    border-radius: 20px;
+    background: white;
+    color: #0c2747;
+    box-shadow: 10px 10px 0 1px rgba(0,0,0,0.5);
+    outline: none;
+    opacity: 1;
+}
