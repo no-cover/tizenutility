@@ -6,6 +6,7 @@ body {
     padding: 0;
     color: #ffffff;
 }
+
 #container {
     width: 100%;
     height: 100%;
@@ -14,6 +15,90 @@ body {
     overflow-y: hidden;
     -webkit-tap-highlight-color: transparent;
 }
+
+#popup {
+    top: 394px;
+    background-color: black;
+    border: 1px #1A1A1A solid;
+    width: 722px;
+    min-height: 200px;
+    border-radius: 16px;
+    padding-bottom: 120px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 4px 5px 0px 2px rgb(0 0 0 / 30%), 7px 8px 0px 5px rgb(0 0 0 / 20%);
+    text-align: center;
+    z-index: 25;
+}
+
+#popup p.small {
+    position: relative;
+    color: white;
+    font-size: 28px;
+    box-sizing: border-box;
+    padding: 15px 56px;
+    line-height: 40px;
+    overflow: hidden;
+    width: 576.4px;
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 5px;
+    min-height: 100px;
+}
+
+#popup button {
+    position: absolute;
+    bottom: 32px;
+    width: 100%;
+    text-align: center;
+    color: rgb(255, 255, 255);
+    background-color: rgb(0, 0, 0);
+    height: 72px;
+    line-height: 65px;
+    min-width: 296px;
+    max-width: 392px;
+    width: auto;
+    font-size: 28px;
+    font-weight: 700;
+    border: 2px #1A1A1A solid;
+    transform: scale(1.08) translateX(-45%);
+    z-index: 75;
+    display: inline-block;
+    border-radius: 16px;
+    box-sizing: border-box;
+}
+
+#popup button:focus {
+    color: rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
+}
+
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#svg-animation {
+    width: 140px;
+    height: 140px;
+}
+
+.circle{
+    fill-opacity: 1;
+    transition: cx 0.1s linear, cy 0.1s linear;
+}
+
 #header {
     width: 100%;
     height: 15%;
@@ -98,21 +183,21 @@ body {
     opacity: 1;
 }
 
-#buttons p {
+#items p {
     width: 100%;
     display: table-cell;
     text-align: center;
     vertical-align: top;
 }
 
-#buttons {
+#items {
     width: 100%;
     height: 15%;
     display: table;
     text-align: center;
 }
 
-#buttons button {
+#items button {
     margin: 5px 20px;
     padding: 15px 85px;
     border: 0px;
@@ -128,7 +213,7 @@ body {
     opacity: 0.7;
 }
 
-#buttons button:focus {
+#items button:focus {
     margin: 0 5px;
     padding: 20px 100px;
     border: 0px;

@@ -18,7 +18,8 @@
         6.0,
         6.5,
         7.0,
-        8.0
+        8.0,
+        9.0
     ]
 
     const AppList = {
@@ -121,9 +122,12 @@
      * @param {Object} list - The object contains data of buttons to create
      * @param {HTMLDivElement} btnNode - The div elm contains apps buttons
      */
-    function addButton(list, btnNode) {
+    function addButton(list, btnNode, skip = false) {
         var newParagraph = document.createElement("p");
-        emptyElement(btnNode);
+        
+        if(!skip) {
+            emptyElement(btnNode);
+        }
 
         for (let b of list) {
             var newButton = document.createElement("button");
@@ -198,7 +202,6 @@
                     }	
                 }
             }
-            
             
             if(previewAppid !== null && previewAppid !== ''){
                 //var appInfo = window.tizen.application.getAppInfo(previewAppid);
@@ -323,38 +326,126 @@
      */
     function printHeader() {
         emptyElement(headerNode);
-        addTextElement(headerNode, '', TIZEN_L10N['COM_TIZEN_UTILITY']);
+        addTextElement(headerNode, '', TIZEN_LEN['COM_TIZEN_UTILITY']);
+    }
+
+    /**
+     * Prints TIZEN API issue.
+     * @private
+     */
+    function printIssue() {
+        emptyElement(contentNode);
+        addTextElement(contentNode, '', TIZEN_LEN['COM_TIZEN_API_IS_NOT_SUPPORTED_ON_THIS_DEVICE']);
+        log('[Status] TIZEN API is not supported on this device');
+    }
+
+    /**
+     * Prints popup.
+     * @private
+     */
+    function printModal() {
+    	emptyElement(containerNode);
+        var newPopupShow = document.createElement("div");
+        newPopupShow.setAttribute('id', 'popup');
+        containerNode.appendChild(newPopupShow);
+        addTextElement(newPopupShow, 'small', TIZEN_LEN['COM_CANNOT_BE_RUN_ON_YOUR_TV']);
+        log('[Status] cannot be run');
+
+        var btnClose = [
+            [TIZEN_LEN['COM_CLOSE'], function() { tizen.application.getCurrentApplication().exit() }],
+        ];
+        addButton(btnClose, newPopupShow, true);
     }
 
     /**
      * Prints information provided by API.
      * @private
      */
-    async function printInfo() {
+    function printInfo() {
         emptyElement(contentNode);
 
         var properties = {
             "getLocalSet()"             : prdinfo.getLocalSet(),
-            // "getDuid()"                 : prdinfo.getDuid(),
             "getModel()"                : prdinfo.getModel(),
             "getRealModel()"            : prdinfo.getRealModel(),
             "getIpAdress()"             : webapis.network.getIp(),
-            // "getDeveloperIp()"          : await getDeveloperIp(webapis.network.getIp()),
             "getPlatformVersion()"      : getPlatformVersion().toString(),
             "getFirmware()"             : prdinfo.getFirmware(),
             "getSmartTVServerType()"    : getKeyByValue(SmartTVserverType, prdinfo.getSmartTVServerType()),
             "getSmartTVServerVersion()" : prdinfo.getSmartTVServerVersion(),
-            // "getUserAgent()"            : navigator.userAgent,
         }
 
         for (var i in properties)
             addTextElement(contentNode, 'small', i + ': ' + properties[i]);
 
-        var buttonBak = [
-            [TIZEN_L10N['COM_BACK'], function() { render() }],
+        var btnBack = [
+            [TIZEN_LEN['COM_BACK'], function() { render() }],
             // ['Set [0]', function() {}]
         ];
-        addButton(buttonBak, footerNode);
+        addButton(btnBack, footerNode);
+    }
+
+    /**
+     * Prints bouncing logo.
+     * @private
+     */
+    function printBouncing() {
+    	var isLoader = document.getElementById('loader');
+        if (isLoader) return;
+    	
+        var newLoaderShow = document.createElement("div");
+        newLoaderShow.setAttribute('id', 'loader');
+        containerNode.appendChild(newLoaderShow);
+
+        var svgAnimation = `
+          <svg id="svg-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+            <defs>
+              <clipPath id="lottie">
+                <path d="M0,0 L150,0 L150,150 L0,150z"></path>
+              </clipPath>
+            </defs>
+            <g id="circles" clip-path="url(#lottie)">
+              <circle id="c1" cx="102.7" cy="75" r="10.5" fill="#47EAA9"></circle>
+              <circle id="c2" cx="75" cy="102.7" r="10.5" fill="#00A7FF"></circle>
+              <circle id="c3" cx="47.3" cy="75" r="10.5" fill="#00A7FF"></circle>
+              <circle id="c4" cx="75" cy="47.3" r="10.5" fill="#00A7FF"></circle>
+            </g>
+          </svg>
+        `;
+        
+        newLoaderShow.innerHTML = svgAnimation;
+
+        const group = document.getElementById('circles');
+        const circles = [
+          document.getElementById('c1'),
+          document.getElementById('c2'),
+          document.getElementById('c3'),
+          document.getElementById('c4')
+        ];
+        const centerX = 75;
+        const centerY = 75;
+        const radius = 48; // max
+        const convergeRadiusMin = 18; // min
+        const speedFactor = 6; // speed control
+        let angle = 0;
+      
+        var animate = function() {
+          const rotationAngle = angle % 360;
+          const dynamicRadius = convergeRadiusMin + (radius - convergeRadiusMin) * 0.5 * (1 + Math.cos((rotationAngle * Math.PI) / 180));
+          circles.forEach((circle, i) => {
+            const theta = rotationAngle + (i * 90);
+            const radian = (theta * Math.PI) / 180;
+            const x = centerX + dynamicRadius * Math.cos(radian);
+            const y = centerY + dynamicRadius * Math.sin(radian);
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+          });
+          angle += speedFactor;
+          requestAnimationFrame(animate);
+        }
+      
+        animate();
+        log('[App] : in progress...');
     }
 
     /**
@@ -369,37 +460,37 @@
 
         // Adds apps button in DOM tree
         var newListShow = document.createElement("div");
-        newListShow.setAttribute('id', 'buttons');
+        newListShow.setAttribute('id', 'items');
 
-        // If PlatformVersion 6.5 or higher
+        // If PlatformVersion 6.5 and above
         if (getPlatformVersion() >= PlatformVersion[3]) {
-            addTextElement(contentNode, '', TIZEN_L10N['COM_START_BY_PRESSING_OK']);
+            addTextElement(contentNode, '', TIZEN_LEN['COM_START_BY_PRESSING_OK']);
             contentNode.appendChild(newListShow);
-            addTextElement(contentNode, '', TIZEN_L10N['COM_FOR_DEVICE_INFO_PRESS_INFO_ENYTIME']);
+            addTextElement(contentNode, '', TIZEN_LEN['COM_FOR_DEVICE_INFO_PRESS_INFO_ENYTIME']);
             
-            var buttons = [
-                [TIZEN_L10N['COM_APPS_STORE'], function() { onAppControlReceived(getKeyByValue(AppList, 1)); render(); }],
-                [TIZEN_L10N['COM_FACTORY_MENU'], function() { onAppControlReceived(getKeyByValue(AppList, 2)); render(); }],
-                [TIZEN_L10N['COM_APP_INFO_VIEWER'], function() { onAppControlReceived(getKeyByValue(AppList, 4)); render(); }],
-                [TIZEN_L10N['COM_MEMORY_DIAGNOSIS'], function() { onAppControlReceived(getKeyByValue(AppList, 5)); render(); }]
+            var items = [
+                [TIZEN_LEN['COM_APPS_STORE'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 1)); }, 1500 ); }],
+                [TIZEN_LEN['COM_FACTORY_MENU'], function() {printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 2)); }, 1500 ); }],
+                [TIZEN_LEN['COM_APP_INFO_VIEWER'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 4)); }, 1500 ); }],
+                [TIZEN_LEN['COM_MEMORY_DIAGNOSIS'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 5)); }, 1500 ); }]
             ];
-                var buttonExt = [
-                [TIZEN_L10N['COM_EXIT'], function() { tizen.application.getCurrentApplication().exit() }]
+                var btnExit = [
+                [TIZEN_LEN['COM_EXIT'], function() { tizen.application.getCurrentApplication().exit() }]
             ];
-        // If PlatformVersion 6.0 or lower
+        // If PlatformVersion 6.0 and below
         } else if (getPlatformVersion() < PlatformVersion[3]) {
-            addTextElement(contentNode, '', TIZEN_L10N['COM_START_BY_PRESSING_OK']);
+            addTextElement(contentNode, '', TIZEN_LEN['COM_START_BY_PRESSING_OK']);
             contentNode.appendChild(newListShow);
-            addTextElement(contentNode, '', TIZEN_L10N['COM_FOR_DEVICE_INFO_PRESS_INFO_ENYTIME']);
+            addTextElement(contentNode, '', TIZEN_LEN['COM_FOR_DEVICE_INFO_PRESS_INFO_ENYTIME']);
             
-            var buttons = [
-                [TIZEN_L10N['COM_APPS_STORE'], function() { onAppControlReceived(getKeyByValue(AppList, 1)); render(); }],
-                [TIZEN_L10N['COM_FACTORY_MENU'], function() { onAppControlReceived(getKeyByValue(AppList, 2)); render(); }],
-                [TIZEN_L10N['COM_APP_INFO_VIEWER'], function() { onAppControlReceived(getKeyByValue(AppList, 3)); render(); }],
-                [TIZEN_L10N['COM_MEMORY_DIAGNOSIS'], function() { onAppControlReceived(getKeyByValue(AppList, 5)); render(); }]
+            var items = [
+                [TIZEN_LEN['COM_APPS_STORE'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 1)); }, 1500 ); }],
+                [TIZEN_LEN['COM_FACTORY_MENU'], function() {printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 2)); }, 1500 ); }],
+                [TIZEN_LEN['COM_APP_INFO_VIEWER'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 3)); }, 1500 ); }],
+                [TIZEN_LEN['COM_MEMORY_DIAGNOSIS'], function() { printBouncing(); setTimeout(function() { onAppControlReceived(getKeyByValue(AppList, 5)); }, 1500 ); }]
             ];
-            var buttonExt = [
-                [TIZEN_L10N['COM_EXIT'], function() { tizen.application.getCurrentApplication().exit() }]
+            var btnExit = [
+                [TIZEN_LEN['COM_EXIT'], function() { tizen.application.getCurrentApplication().exit() }]
             ];
         // If cannot get PlatformVersion
         } else {
@@ -407,19 +498,9 @@
             log('[App] : exit app.');
             tizen.application.getCurrentApplication().exit();
 
-            // addTextElement(contentNode, '', TIZEN_L10N['COM_CANNOT_BE_RUNNED']);
-            // contentNode.appendChild(newListShow);
-            // addTextElement(contentNode, '', TIZEN_L10N['COM_FOR_DEVICE_INFO_PRESS_INFO_ENYTIME']);
-
-            // var buttons = [
-
-            // ];
-            // var buttonExt = [
-            //     [TIZEN_L10N['COM_EXIT'], function() { tizen.application.getCurrentApplication().exit() }]
-            // ];
         }
-        addButton(buttons, newListShow);
-        addButton(buttonExt, footerNode);
+        addButton(items, newListShow);
+        addButton(btnExit, footerNode);
 
     }
 
@@ -428,14 +509,28 @@
      * @private
      */
     function init() {
-        prdinfo = window.webapis.productinfo;
-
-        headerNode = document.querySelector("#header");
+        var isTizenTv = Boolean(window.tizen);
+        containerNode = document.querySelector("#container");
         contentNode = document.querySelector("#main");
-        footerNode = document.querySelector("#footer");
 
-        render();
-        setDefaultEvents();
+        if (!isTizenTv) {
+            printIssue()
+        } else {
+
+            prdinfo = window.webapis.productinfo;
+
+            if (getPlatformVersion() < PlatformVersion[0]) {
+                printModal()
+            } else {
+
+                containerNode = document.querySelector("#container");
+                headerNode = document.querySelector("#header");
+                footerNode = document.querySelector("#footer");
+
+                render();
+                setDefaultEvents();
+            }
+        }
     }
 
     window.onload = init;
