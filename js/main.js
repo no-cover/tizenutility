@@ -55,24 +55,26 @@
      * @param {Object} event - The object contains data of key event
      */
     function keyEventHandler(event) {
+    	var timeBegin = Date.now();
+    	
         if (event.keyCode === LEFT_ARROW_BUTTON)
             focusButton("prev"),
-            log("[keynav] onKeyLeft");
+            log("[keynav] onKeyLeft: " + (Date.now() - timeBegin) + 'ms');
         else if (event.keyCode === UP_ARROW_BUTTON)
             focusButton("up"),
-            log("[keynav] onKeyUp");
+            log("[keynav] onKeyUp: " + (Date.now() - timeBegin) + 'ms')
         else if (event.keyCode === DOWN_ARROW_BUTTON)
             focusButton("down"),
-            log("[keynav] onKeyDown");
+            log("[keynav] onKeyDown: " + (Date.now() - timeBegin) + 'ms');
         else if (event.keyCode === RIGHT_ARROW_BUTTON)
             focusButton("next"),
-            log("[keynav] onKeyRight");
+            log("[keynav] onKeyRight: " + (Date.now() - timeBegin) + 'ms');
         else if (event.keyCode === INFO_BUTTON) {
-            log("[keynav] onKeyInfo"),
+            log("[keynav] onKeyInfo: " + (Date.now() - timeBegin) + 'ms'),
             printInfo();
         } else if (event.keyCode === RETURN_BUTTON) {
             try {
-                log("[keynav] onKeyReturn");
+                log("[keynav] onKeyReturn: " + (Date.now() - timeBegin) + 'ms');
                 log('[App] : exit app.');
                 tizen.application.getCurrentApplication().exit();
             } catch (ignore) {}
