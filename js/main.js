@@ -511,11 +511,10 @@
      * @private
      */
     function init() {
-        var isTizenTv = Boolean(window.tizen);
         containerNode = document.querySelector("#container");
         contentNode = document.querySelector("#main");
 
-        if (!isTizenTv) {
+        if (window.tizen === undefined) {
             printIssue()
         } else {
 
