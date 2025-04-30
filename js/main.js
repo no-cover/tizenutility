@@ -205,6 +205,7 @@
                 }
             }
             
+            
             if(previewAppid !== null && previewAppid !== ''){
                 //var appInfo = window.tizen.application.getAppInfo(previewAppid);
                 var appinfo = null;
@@ -224,69 +225,66 @@
                     window.tizen.application.launch(previewAppid);
                     log("[App][Main.js] launch app end");
                 }else{
-                    //case 2 : deeplink to app detail
+                    //case 2 : deeplink to apps detail
                     log("[App][Main.js] deeplink to apps detail : " + JSON.stringify(previewAppid));
                     var appControlData1 = new tizen.ApplicationControlData('Sub_Menu', ['detail']);
                     var appControlData2 = new tizen.ApplicationControlData('widget_id',[previewAppid]);
                     var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1,appControlData2]);
-                    var appId = app;
+                    var appId = "app";
                     window.tizen.application.launchAppControl(deepAppControl,appId);
-                    log("[App][Main.js] deeplink to app detail End");
+                    log("[App][Main.js] deeplink to apps detail End");
                 } 
                 
             }else {
                 //case 3 : deeplink to apps PUBLICTV list
-                log("[App][Main.js] deeplink to app PUBLICVALUE list");
-                var appControlData1 = new tizen.ApplicationControlData('Sub_Menu', ['main']);
-                var appControlData2 = new tizen.ApplicationControlData('category_id',['PUBLICVALUE']);
-                var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1,appControlData2]);
-                var appId = app;
-                window.tizen.application.launchAppControl(deepAppControl,appId);
-                log("[App][Main.js] deeplink to app PUBLICTV list End");
+                log("[App][Main.js] deeplink to apps PUBLICVALUE list");
+                
+                try {
+                    var modeCode = webapis.productinfo.getModelCode();
+                    console.error("[App][Main.js] modeCode = " + modeCode);
+                    var year = modeCode.split("_", 1);
+                    console.error("[App][Main.js] year = " + year);
+                    
+                    var producttype = webapis.featureconfig.getFeatureConfigLong("com.samsung/featureconf/product.product_type");
+                    console.error("[App][Main.js] producttype = " + producttype);
+                    
+                    var infolinkversion = webapis.productinfo.getSmartTVServerVersion();
+                    console.error("[App][Main.js] infolinkversion = " + infolinkversion);
+                    
+                    //OS80 : 23 -> 24 OSU image  T09 : 23 -> 25 OSU image
+                    if(((Number(year) >= 24) && (Number(producttype) !== 4)) || (Number(year)== 22 && (infolinkversion >= "T-INFOLINK2022-1020")) || (Number(year)== 23 && (modeCode.includes("OS80") || modeCode.includes("T09")))){    				
+                        log("[App][Main.js] move focus to Public Value row.");
+                        var ComponentID = "d/apps.tab.content@CategoryID_Content_PUBLICVALUE";
+                        var appControlData1 = new tizen.ApplicationControlData('__COBA_REQUEST_FOCUS_GROUPTAG__', [ComponentID]);
+                        var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1]);
+                        var appId = "app";
+                        window.tizen.application.launchAppControl(deepAppControl,appId);
+                        
+                        log("[App][Main.js] Deeplink end.");
+                    }
+                    else{
+                        log("[App][Main.js] Original apps");
+                        var appControlData1 = new tizen.ApplicationControlData('Sub_Menu', ['main']);
+                        var appControlData2 = new tizen.ApplicationControlData('category_id',['PUBLICVALUE']);
+                        var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1,appControlData2]);
+                        var appId = app;
+                        window.tizen.application.launchAppControl(deepAppControl,appId);
+                    }
+                } catch (e) {
+                    console.error("[App][Main.js] error = " + e);
+                }
+                
+                log("[App][Main.js] deeplink to apps PUBLICTV list End");
             }
             log('[App] : exit app.');
             tizen.application.getCurrentApplication().exit();
             
         }else {
-
             console.error('[App:onAppControlReceived()] appControl is not currect.');
             log('[App] : exit app.');
             tizen.application.getCurrentApplication().exit();
-
         }
-
-    }
-
-    /**
-     * Gets DeeveloperIP property
-     * @private
-     */
-    function getDeveloperIp(data) {
-        return new Promise((resolve, reject) => {
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', 'http://' + data + ':8001/api/v2/', true);
-          xhr.setRequestHeader('Cache-Control', 'no-cache');
-          xhr.timeout = 1000;
-      
-          xhr.onload = function () {
-            if (xhr.status === 200) {
-              try {
-                const response = JSON.parse(xhr.responseText);
-                resolve(response.device.developerIP || null);
-              } catch (e) {
-                reject(null); 
-              }
-            } else {
-              reject(null);
-            }
-          };
-      
-          xhr.ontimeout = function () {
-            reject(null);
-          };
-      
-          xhr.send(null);
-        });
+        
     
     }
 
@@ -342,24 +340,6 @@
     }
 
     /**
-     * Prints popup.
-     * @private
-     */
-    function printModal() {
-    	emptyElement(containerNode);
-        var newPopupShow = document.createElement("div");
-        newPopupShow.setAttribute('id', 'popup');
-        containerNode.appendChild(newPopupShow);
-        addTextElement(newPopupShow, 'small', TIZEN_LEN['COM_CANNOT_BE_RUN_ON_YOUR_TV']);
-        log('[Status] cannot be run');
-
-        var btnClose = [
-            [TIZEN_LEN['COM_CLOSE'], function() { tizen.application.getCurrentApplication().exit() }],
-        ];
-        addButton(btnClose, newPopupShow, true);
-    }
-
-    /**
      * Prints information provided by API.
      * @private
      */
@@ -382,71 +362,30 @@
 
         var btnBack = [
             [TIZEN_LEN['COM_BACK'], function() { render() }],
-            // ['Set [0]', function() {}]
         ];
         addButton(btnBack, footerNode);
     }
 
     /**
-     * Prints bouncing logo.
+     * Prints Lottie animation.
      * @private
      */
     function printBouncing() {
-    	var isLoader = document.getElementById('loader');
+        var isLoader = document.getElementById('loader');
         if (isLoader) return;
-    	
+
         var newLoaderShow = document.createElement("div");
         newLoaderShow.setAttribute('id', 'loader');
         containerNode.appendChild(newLoaderShow);
 
-        var svgAnimation = `
-          <svg id="svg-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
-            <defs>
-              <clipPath id="lottie">
-                <path d="M0,0 L150,0 L150,150 L0,150z"></path>
-              </clipPath>
-            </defs>
-            <g id="circles" clip-path="url(#lottie)">
-              <circle id="c1" cx="102.7" cy="75" r="10.5" fill="#47EAA9"></circle>
-              <circle id="c2" cx="75" cy="102.7" r="10.5" fill="#00A7FF"></circle>
-              <circle id="c3" cx="47.3" cy="75" r="10.5" fill="#00A7FF"></circle>
-              <circle id="c4" cx="75" cy="47.3" r="10.5" fill="#00A7FF"></circle>
-            </g>
-          </svg>
-        `;
-        
-        newLoaderShow.innerHTML = svgAnimation;
+        lottie.loadAnimation({
+            container: newLoaderShow,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'lottie.json'
+        });
 
-        const group = document.getElementById('circles');
-        const circles = [
-          document.getElementById('c1'),
-          document.getElementById('c2'),
-          document.getElementById('c3'),
-          document.getElementById('c4')
-        ];
-        const centerX = 75;
-        const centerY = 75;
-        const radius = 48; // max
-        const convergeRadiusMin = 18; // min
-        const speedFactor = 6; // speed control
-        let angle = 0;
-      
-        var animate = function() {
-          const rotationAngle = angle % 360;
-          const dynamicRadius = convergeRadiusMin + (radius - convergeRadiusMin) * 0.5 * (1 + Math.cos((rotationAngle * Math.PI) / 180));
-          circles.forEach((circle, i) => {
-            const theta = rotationAngle + (i * 90);
-            const radian = (theta * Math.PI) / 180;
-            const x = centerX + dynamicRadius * Math.cos(radian);
-            const y = centerY + dynamicRadius * Math.sin(radian);
-            circle.setAttribute('cx', x);
-            circle.setAttribute('cy', y);
-          });
-          angle += speedFactor;
-          requestAnimationFrame(animate);
-        }
-      
-        animate();
         log('[App] : in progress...');
     }
 
@@ -515,13 +454,14 @@
         contentNode = document.querySelector("#main");
 
         if (window.tizen === undefined) {
-            printIssue()
+            printIssue();
         } else {
 
             prdinfo = window.webapis.productinfo;
 
             if (getPlatformVersion() < PlatformVersion[0]) {
-                printModal()
+                alert(TIZEN_LEN['COM_CANNOT_BE_RUN_ON_YOUR_TV']);
+                tizen.application.getCurrentApplication().exit();
             } else {
 
                 containerNode = document.querySelector("#container");
