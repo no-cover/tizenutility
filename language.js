@@ -11,7 +11,6 @@ TIZEN_LEN=
 	"COM_FACTORY_MENU" : "Factory Menu",
 	"COM_APP_INFO_VIEWER" : "App Info Viewer",
 	"COM_MEMORY_DIAGNOSIS" : "Memory Diagnosis",
-	"COM_CLOSE" : "Close",
 	"COM_BACK" : "Back",
 	"COM_EXIT" : "Exit",
 };

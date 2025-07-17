@@ -230,7 +230,7 @@
                     var appControlData1 = new tizen.ApplicationControlData('Sub_Menu', ['detail']);
                     var appControlData2 = new tizen.ApplicationControlData('widget_id',[previewAppid]);
                     var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1,appControlData2]);
-                    var appId = "app";
+                    var appId = app;
                     window.tizen.application.launchAppControl(deepAppControl,appId);
                     log("[App][Main.js] deeplink to apps detail End");
                 } 
@@ -257,7 +257,7 @@
                         var ComponentID = "d/apps.tab.content@CategoryID_Content_PUBLICVALUE";
                         var appControlData1 = new tizen.ApplicationControlData('__COBA_REQUEST_FOCUS_GROUPTAG__', [ComponentID]);
                         var deepAppControl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', null, null, null, [appControlData1]);
-                        var appId = "app";
+                        var appId = app;
                         window.tizen.application.launchAppControl(deepAppControl,appId);
                         
                         log("[App][Main.js] Deeplink end.");
